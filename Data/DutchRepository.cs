@@ -32,16 +32,24 @@ namespace DutchTreat.Data
             }
         }
 
-        public IEnumerable<Order> GetAllOrders()
+        public IEnumerable<Order> GetAllOrders(bool includeItems)
         {
             try
             {
                 logger.LogInformation("GetAllOrders");
-                return ctx.Orders
-                    .Include(o => o.Items)
-                    .ThenInclude(i => i.Product)
-                    .OrderByDescending(p => p.OrderDate).ToList();
 
+                if (includeItems)
+                {
+                    return ctx.Orders
+                        .Include(o => o.Items)
+                        .ThenInclude(i => i.Product)
+                        .OrderByDescending(p => p.OrderDate).ToList();
+                } 
+                else
+                {
+                    return ctx.Orders
+                        .OrderByDescending(p => p.OrderDate).ToList();
+                }
             }
             catch (Exception ex)
             {
