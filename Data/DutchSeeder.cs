@@ -1,10 +1,12 @@
 ﻿using DutchTreat.Data.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DutchTreat.Data
 {
@@ -12,16 +14,36 @@ namespace DutchTreat.Data
     {
         private readonly DutchContext ctx;
         private readonly IWebHostEnvironment hosting;
+        private readonly UserManager<StoreUser> userManager;
 
-        public DutchSeeder(DutchContext ctx, IWebHostEnvironment hosting)
+        public DutchSeeder(DutchContext ctx, IWebHostEnvironment hosting, UserManager<StoreUser> userManager)
         {
             this.ctx = ctx;
             this.hosting = hosting;
+            this.userManager = userManager;
         }
 
-        public void Seed()
+        public async Task SeedAsync()
         {
             ctx.Database.EnsureCreated();
+
+            StoreUser user = await userManager.FindByEmailAsync("maycon@dutchtreat.com");
+            if (user == null)
+            {
+                user = new StoreUser()
+                {
+                    FirstName = "Maycon",
+                    LastName = "Brito",
+                    Email = "maycon@dutchtreat.com",
+                    UserName = "maycon@dutchtreat.com"
+                };
+
+                var result = await userManager.CreateAsync(user, "P@ssword!");
+                if (result != IdentityResult.Success)
+                {
+                    throw new InvalidOperationException("Could not create new user in seeder");
+                }
+            }
 
             if (!ctx.Products.Any())
             {
@@ -34,6 +56,7 @@ namespace DutchTreat.Data
                 {
                     OrderDate = DateTime.Now,
                     OrderNumber = "12345",
+                    User = user,
                     Items = new List<OrderItem>()
                     {
                         new OrderItem()

@@ -1,15 +1,16 @@
 using AutoMapper;
 using DutchTreat.Data;
+using DutchTreat.Data.Entities;
 using DutchTreat.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using System.Reflection;
-using System.Security.Cryptography.Xml;
 
 namespace DutchTreat
 {
@@ -26,6 +27,14 @@ namespace DutchTreat
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddIdentity<StoreUser, IdentityRole>(cfg =>
+            {
+                cfg.User.RequireUniqueEmail = true;
+                cfg.Password.RequireDigit = false;
+                cfg.Password.RequireLowercase = false;
+            })
+                .AddEntityFrameworkStores<DutchContext>();
+
             services.AddDbContext<DutchContext>(cfg =>
             {
                 cfg.UseSqlServer(config.GetConnectionString("DutchConnectionString"));
@@ -58,6 +67,9 @@ namespace DutchTreat
             //app.UseDefaultFiles(); to use html files, was disabled to migrate to MVC
             app.UseStaticFiles();
             app.UseNodeModules();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             // Enabling MVC and routes
             app.UseMvc(cfg =>

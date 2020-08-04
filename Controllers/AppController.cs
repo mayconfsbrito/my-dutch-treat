@@ -1,6 +1,7 @@
 ﻿using DutchTreat.Data;
 using DutchTreat.Services;
 using DutchTreat.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
@@ -52,7 +53,8 @@ namespace DutchTreat.Controllers
             ViewBag.Title = "About Us";
             return View();
         }
-
+        
+        [Authorize]
         public IActionResult Shop()
         {
             var results = repository.GetAllProducts();
