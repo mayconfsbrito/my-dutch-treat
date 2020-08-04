@@ -9,8 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Reflection;
+using System.Text;
 
 namespace DutchTreat
 {
@@ -34,6 +36,19 @@ namespace DutchTreat
                 cfg.Password.RequireLowercase = false;
             })
                 .AddEntityFrameworkStores<DutchContext>();
+
+            services
+                .AddAuthentication()
+                .AddCookie()
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidIssuer = config["Tokens:Issuer"],
+                        ValidAudience = config["Tokens:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Tokens:Key"]))
+                    };
+                });
 
             services.AddDbContext<DutchContext>(cfg =>
             {
